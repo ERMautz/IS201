@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wordle Game</title>
+  <style>
+    body {
+      background-color: #121213;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 30px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    #game {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 5px;
+    }
+
+    .tile {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #3a3a3c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      background-color: #121213;
+      color: white;
+    }
+
+    .correct {
+      background-color: #538d4e;
+      border-color: #538d4e;
+    }
+
+    .present {
+      background-color: #b59f3b;
+      border-color: #b59f3b;
+    }
+
+    .absent {
+      background-color: #3a3a3c;
+      border-color: #3a3a3c;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 1.2rem;
+    }
+
+    #restartBtn {
+      margin-top: 20px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wordle Game</h1>
+  <div id="game"></div>
+  <div id="message"></div>
+  <button id="restartBtn">Play Again</button>
+
+  <script>
+    // Only 5-letter words
+    const wordList = [
+      "apple", "grape", "peach", "melon", "berry",
+      "lemon", "plumb", "mango", "latch", "pride",
+      "crane", "sweet", "bring", "snake", "flame",
+      "train", "drink", "chant", "cabin", "scoop",
+      "brave", "trace", "blush", "liver", "piano",
+      "spike", "blame", "frost", "guess", "orbit"
+      // Add up to 500 valid 5-letter words
+    ];
+
+    const maxGuesses = 6;
+    const wordLength = 5;
+    let secretWord;
+    let currentGuess = '';
+    let currentRow = 0;
+    let game, message, restartBtn;
+
+    function getRandomWord() {
+      let word;
+      do {
+        word = wordList[Math.floor(Math.random() * wordList.length)];
+      } while (word.length !== wordLength);
+      return word.toUpperCase();
+    }
+
+    function initGame() {
+      secretWord = getRandomWord();
+      currentGuess = '';
+      currentRow = 0;
+      document.removeEventListener('keydown', handleKeyPress);
+      document.addEventListener('keydown', handleKeyPress);
+      message.textContent = '';
+      restartBtn.style.display = 'none';
+
+      game.innerHTML = '';
+      for (let i = 0; i < maxGuesses; i++) {
+        const row = document.createElement('div');
+        row.classList.add('row');
+        for (let j = 0; j < wordLength; j++) {
+          const tile = document.createElement('div');
+          tile.classList.add('tile');
+          row.appendChild(tile);
+        }
+        game.appendChild(row);
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (currentRow >= maxGuesses) return;
+      const key = e.key.toUpperCase();
+
+      if (key === 'ENTER') {
+        if (currentGuess.length === wordLength) {
+          checkGuess();
+        }
+      } else if (key === 'BACKSPACE') {
+        currentGuess = currentGuess.slice(0, -1);
+        updateTiles();
+      } else if (/^[A-Z]$/.test(key) && currentGuess.length < wordLength) {
+        currentGuess += key;
+        updateTiles();
+      }
+    }
+
+    function updateTiles() {
+      const row = game.children[currentRow];
+      for (let i = 0; i < wordLength; i++) {
+        row.children[i].textContent = currentGuess[i] || '';
+      }
+    }
+
+    function checkGuess() {
+      const row = game.children[currentRow];
+      const guess = currentGuess;
+      const result = [];
+      let secretArray = secretWord.split('');
+
+      for (let i = 0; i < wordLength; i++) {
+        if (guess[i] === secretWord[i]) {
+          result[i] = 'correct';
+          secretArray[i] = null;
+        }
+      }
+
+      for (let i = 0; i < wordLength; i++) {
+        if (!result[i]) {
+          const index = secretArray.indexOf(guess[i]);
+          if (index > -1) {
+            result[i] = 'present';
+            secretArray[index] = null;
+          } else {
+            result[i] = 'absent';
+          }
+        }
+      }
+
+      for (let i = 0; i < wordLength; i++) {
+        row.children[i].classList.add(result[i]);
+      }
+
+      if (guess === secretWord) {
+        endGame('🎉 You got it!');
+      } else if (currentRow === maxGuesses - 1) {
+        endGame(`😞 The word was "${secretWord}"`);
+      } else {
+        currentRow++;
+        currentGuess = '';
+      }
+    }
+
+    function endGame(msg) {
+      message.textContent = msg;
+      document.removeEventListener('keydown', handleKeyPress);
+      restartBtn.style.display = 'inline-block';
+    }
+
+    window.onload = () => {
+      game = document.getElementById('game');
+      message = document.getElementById('message');
+      restartBtn = document.getElementById('restartBtn');
+      restartBtn.addEventListener('click', initGame);
+      initGame();
+    };
+  </script>
+</body>
+</html>

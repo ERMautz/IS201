@@ -1,0 +1,46 @@
+p{
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.header{
+    background-color: rgb(132, 83, 132);
+    color: black;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+} 
+.emphasizedText{
+    font-style: italic;
+    color: rgb(106, 48, 106);
+}
+
+.mainbody{
+    background-color: whitesmoke;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    text-align: center;
+    border: 5px solid black;
+    margin: 50px;
+    padding: 25px;
+}
+
+a{
+    color: white;
+}
+.centeredList{
+    padding-left: 0;
+    list-style-position: outside;
+    margin: 0 auto;
+    display: table;
+    text-align: left;
+}
+.footer{
+    position: fixed;
+    background-color: black;
+    color:white;
+    bottom: 0px;
+    left: 5px;
+    right: 5px;
+    height: 25px;
+    line-height: 25px;
+}
